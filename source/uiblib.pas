@@ -512,6 +512,9 @@ type
     function GetAsCurrency(const Index: Word): Currency; virtual;
     function GetAsInt64(const Index: Word): Int64; virtual;
     function GetAsInteger(const Index: Word): Integer; virtual;
+  {$IFDEF DELPHI16_UP}
+    function GetAsNativeInt(const Index: Word): NativeInt; virtual;
+  {$ENDIF}
     function GetAsSingle(const Index: Word): Single; virtual;
     function GetAsSmallint(const Index: Word): Smallint; virtual;
     function GetAsRawByteString(const Index: Word): RawByteString; virtual;
@@ -523,15 +526,18 @@ type
     function GetAsDate(const Index: Word): Integer; virtual;
     function GetAsTime(const Index: Word): Cardinal; virtual;
     function GetAsBoolean(const Index: Word): boolean; virtual;
-{$IFDEF DELPHI14_UP}
+  {$IFDEF DELPHI14_UP}
     function GetAsTValue(const Index: Word): TValue; virtual;
-{$ENDIF}
+  {$ENDIF}
     function GetAsUUID(const Index: Word): TGUID; virtual;
     procedure SetIsNull(const Index: Word; const Value: boolean); virtual;
     procedure SetAsDouble(const Index: Word; const Value: Double); virtual;
     procedure SetAsCurrency(const Index: Word; const Value: Currency); virtual;
     procedure SetAsInt64(const Index: Word; const Value: Int64); virtual;
     procedure SetAsInteger(const Index: Word; const Value: Integer); virtual;
+  {$IFDEF DELPHI16_UP}
+    procedure SetAsNativeInt(const Index: Word; const Value: NativeInt); virtual;
+  {$ENDIF}
     procedure SetAsSingle(const Index: Word; const Value: Single); virtual;
     procedure SetAsSmallint(const Index: Word; const Value: Smallint); virtual;
     procedure SetAsRawByteString(const Index: Word; const Value: RawByteString); virtual;
@@ -555,6 +561,9 @@ type
     function GetByNameAsCurrency(const Name: string): Currency;
     function GetByNameAsInt64(const Name: string): Int64;
     function GetByNameAsInteger(const Name: string): Integer;
+  {$IFDEF DELPHI16_UP}
+    function GetByNameAsNativeInt(const Name: string): NativeInt; virtual;
+  {$ENDIF}
     function GetByNameAsSingle(const Name: string): Single;
     function GetByNameAsSmallint(const Name: string): Smallint;
     function GetByNameAsAnsiString(const Name: string): AnsiString;
@@ -575,6 +584,9 @@ type
     procedure SetByNameAsCurrency(const Name: string; const Value: Currency);
     procedure SetByNameAsInt64(const Name: string; const Value: Int64);
     procedure SetByNameAsInteger(const Name: string; const Value: Integer);
+  {$IFDEF DELPHI16_UP}
+    procedure SetByNameAsNativeInt(const Name: string; const Value: NativeInt); virtual;
+  {$ENDIF}
     procedure SetByNameAsSingle(const Name: string; const Value: Single);
     procedure SetByNameAsSmallint(const Name: string; const Value: Smallint);
     procedure SetByNameAsAnsiString(const Name: string; const Value: AnsiString);
@@ -590,9 +602,9 @@ type
     procedure CheckRange(const Index: Word); virtual;
     function GetFieldIndex(const name: AnsiString): Word; virtual;
     function TryGetFieldIndex(const name: AnsiString; out index: Word): Boolean; virtual;
-{$IFDEF DELPHI14_UP}
+  {$IFDEF DELPHI14_UP}
     function GetAsType<T>(var ctx: TRttiContext): T;
-{$ENDIF}
+  {$ENDIF}
     property Data: PUIBSQLDa read FXSQLDA;
     property IsBlob[const Index: Word]: boolean read GetIsBlob;
     property IsBlobText[const Index: Word]: boolean read GetIsBlobText;
@@ -614,6 +626,9 @@ type
     property AsDouble     [const Index: Word]: Double     read GetAsDouble     write SetAsDouble;
     property AsCurrency   [const Index: Word]: Currency   read GetAsCurrency   write SetAsCurrency;
     property AsInt64      [const Index: Word]: Int64      read GetAsInt64      write SetAsInt64;
+  {$IFDEF DELPHI16_UP}
+    property AsNativeInt  [const Index: Word]: NativeInt  read GetAsNativeInt  write SetAsNativeInt;
+  {$ENDIF}
     property AsString     [const Index: Word]: string     read GetAsString write SetAsString;
     property AsRawByteString[const Index: Word]: RawByteString  read GetAsRawByteString write SetAsRawByteString;
     property AsAnsiString [const Index: Word]: AnsiString  read GetAsAnsiString     write SetAsAnsiString;
@@ -638,6 +653,9 @@ type
     property ByNameAsDouble     [const name: string]: Double     read GetByNameAsDouble     write SetByNameAsDouble;
     property ByNameAsCurrency   [const name: string]: Currency   read GetByNameAsCurrency   write SetByNameAsCurrency;
     property ByNameAsInt64      [const name: string]: Int64      read GetByNameAsInt64      write SetByNameAsInt64;
+  {$IFDEF DELPHI16_UP}
+    property ByNameAsNativeInt  [const name: string]: NativeInt  read GetByNameAsNativeInt  write SetByNameAsNativeInt;
+  {$ENDIF}
     property ByNameAsString     [const name: string]: string     read GetByNameAsString     write SetByNameAsString;
     property ByNameAsAnsiString     [const name: string]: AnsiString     read GetByNameAsAnsiString     write SetByNameAsAnsiString;
     property ByNameAsRawByteString  [const name: string]: RawByteString     read GetByNameAsRawByteString     write SetByNameAsRawByteString;
@@ -812,6 +830,9 @@ type
     property AsDouble     [const Index: Word]: Double     read GetAsDouble;
     property AsCurrency   [const Index: Word]: Currency   read GetAsCurrency;
     property AsInt64      [const Index: Word]: Int64      read GetAsInt64;
+  {$IFDEF DELPHI16_UP}
+    property AsNativeInt  [const Index: Word]: NativeInt  read GetAsNativeInt;
+  {$ENDIF}
     property AsRawByteString [const Index: Word]: RawByteString read GetAsRawByteString;
     property AsAnsiString [const Index: Word]: AnsiString read GetAsAnsiString;
     property AsUnicodeString [const Index: Word]: UnicodeString read GetAsUnicodeString;
@@ -830,6 +851,9 @@ type
     property ByNameAsDouble     [const name: string]: Double     read GetByNameAsDouble;
     property ByNameAsCurrency   [const name: string]: Currency   read GetByNameAsCurrency;
     property ByNameAsInt64      [const name: string]: Int64      read GetByNameAsInt64;
+  {$IFDEF DELPHI16_UP}
+    property ByNameAsNativeInt  [const name: string]: NativeInt  read GetByNameAsNativeInt;
+  {$ENDIF}
     property ByNameAsAnsiString     [const name: string]: AnsiString     read GetByNameAsAnsiString;
     property ByNameAsUnicodeString [const name: string]: UnicodeString read GetByNameAsUnicodeString;
     property ByNameAsQuad       [const name: string]: TISCQuad   read GetByNameAsQuad;
@@ -867,6 +891,9 @@ type
     procedure SetAsCurrency(const Index: Word; const Value: Currency); override;
     procedure SetAsInt64(const Index: Word; const Value: Int64); override;
     procedure SetAsInteger(const Index: Word; const Value: Integer); override;
+  {$IFDEF DELPHI16_UP}
+    procedure SetAsNativeInt(const Index: Word; const Value: NativeInt); override;
+  {$ENDIF}
     procedure SetAsSingle(const Index: Word; const Value: Single); override;
     procedure SetAsSmallint(const Index: Word; const Value: Smallint); override;
     procedure SetAsRawByteString(const Index: Word; const Value: RawByteString); override;
@@ -3726,6 +3753,58 @@ type
     end;
   end;
 
+{$IFDEF DELPHI16_UP}
+  function TSQLDA.GetAsNativeInt(const Index: Word): NativeInt;
+  var ASQLCode: SmallInt;
+  begin
+    CheckRange(Index);
+    with FXSQLDA.sqlvar[Index] do
+    begin
+      Result := 0;
+      if (sqlind <> nil) and (sqlind^ = -1) then Exit;
+      ASQLCode := (sqltype and not(1));
+      // Is Numeric ?
+      if (sqlscale < 0)  then
+      begin
+        case ASQLCode of
+          SQL_SHORT  : Result := PSmallInt(sqldata)^ div ScaleDivisor[sqlscale];
+          SQL_LONG   : Result := PInteger(sqldata)^  div ScaleDivisor[sqlscale];
+          SQL_INT64,
+          SQL_QUAD   : Result := PInt64(sqldata)^ div ScaleDivisor[sqlscale];
+          SQL_D_FLOAT,
+          SQL_DOUBLE : Result := Trunc(PDouble(sqldata)^);
+        else
+          raise EUIBConvertError.Create(EUIB_UNEXPECTEDERROR);
+        end;
+      end else
+        case ASQLCode of
+          SQL_LONG      : Result := PInteger(sqldata)^;
+          SQL_INT64     : Result := PInt64(sqldata)^;
+{$IFDEF IB7_UP}
+          SQL_BOOLEAN,
+{$ENDIF}
+          SQL_SHORT     : Result := PSmallint(sqldata)^;
+          SQL_D_FLOAT,
+          SQL_DOUBLE    : Result := Trunc(PDouble(sqldata)^);
+          SQL_FLOAT     : Result := Trunc(PSingle(sqldata)^);
+          SQL_TIMESTAMP : Result := PISCTimeStamp(sqldata).timestamp_date - DateOffset; // Only Date
+          SQL_TYPE_DATE : Result := PInteger(sqldata)^ - DateOffset;
+          SQL_TYPE_TIME : ; // Result := 0; What else ??
+          SQL_TEXT      : ConvertString(SQL_TEXT, Index, result);
+          SQL_VARYING   : ConvertString(SQL_VARYING, Index, result);
+{$IFDEF FB25_UP}
+          SQL_NULL: ;
+{$ENDIF}
+{$IFDEF FB30_UP}
+          SQL_BOOLEAN: Result := PByte(sqldata)^;
+{$ENDIF}
+        else
+          raise EUIBConvertError.Create(EUIB_CASTERROR);
+        end;
+    end;
+  end;
+{$ENDIF}
+
   function TSQLDA.GetAsSingle(const Index: Word): Single;
   var ASQLCode: SmallInt;
   begin
@@ -4819,6 +4898,56 @@ end;
     end;
   end;
 
+{$IFDEF DELPHI16_UP}
+  procedure TSQLDA.SetAsNativeInt(const Index: Word; const Value: NativeInt);
+  var ASQLCode: SmallInt;
+  begin
+    with FXSQLDA.sqlvar[Index] do
+    begin
+      ASQLCode := (sqltype and not(1));
+      // Is Numeric ?
+      if (sqlscale < 0)  then
+      begin
+        case ASQLCode of
+          SQL_SHORT  : PSmallInt(sqldata)^ := Value * ScaleDivisor[sqlscale];
+          SQL_LONG   : PInteger(sqldata)^  := Value * ScaleDivisor[sqlscale];
+          SQL_INT64,
+          SQL_QUAD   : PInt64(sqldata)^    := Value * ScaleDivisor[sqlscale];
+          SQL_D_FLOAT,
+          SQL_DOUBLE : PDouble(sqldata)^   := Value;
+        else
+          raise EUIBConvertError.Create(EUIB_UNEXPECTEDERROR);
+        end;
+      end else
+        case ASQLCode of
+          SQL_D_FLOAT,
+          SQL_DOUBLE    : PDouble(sqldata)^   := Value;
+          SQL_TIMESTAMP : EncodeTimeStamp(Value, PISCTimeStamp(sqldata));
+          SQL_TYPE_DATE : PInteger(sqldata)^ := Value + DateOffset;
+          SQL_TYPE_TIME : PCardinal(sqldata)^ := 0;
+          SQL_LONG      : PInteger(sqldata)^ := Value;
+          SQL_FLOAT     : PSingle(sqldata)^ := Value;
+{$IFDEF IB7_UP}
+          SQL_BOOLEAN   : PSmallInt(sqldata)^ := Ord(Value <> 0);
+{$ENDIF}
+          SQL_SHORT     : PSmallint(sqldata)^ := Value;
+          SQL_INT64     : PInt64(sqldata)^ := Value;
+          SQL_TEXT      : EncodeString(SQL_TEXT, Index, IntToStr(Value));
+          SQL_VARYING   : EncodeString(SQL_VARYING, Index, IntToStr(Value));
+{$IFDEF FB25_UP}
+          SQL_NULL: ;
+{$ENDIF}
+{$IFDEF FB30_UP}
+          SQL_BOOLEAN   : PByte(sqldata)^ := Ord(Value <> 0);
+{$ENDIF}
+        else
+          raise EUIBConvertError.Create(EUIB_CASTERROR);
+        end;
+        if (sqlind <> nil) then sqlind^ := 0; // not null
+    end;
+  end;
+{$ENDIF}
+
   procedure TSQLDA.SetAsSingle(const Index: Word; const Value: Single);
   var ASQLCode: SmallInt;
   begin
@@ -5267,6 +5396,13 @@ end;
     Result := GetAsInteger(GetFieldIndex(AnsiString(Name)));
   end;
 
+{$IFDEF DELPHI16_UP}
+  function TSQLDA.GetByNameAsNativeInt(const Name: string): NativeInt;
+  begin
+    Result := GetAsNativeInt(GetFieldIndex(AnsiString(Name)));
+  end;
+{$ENDIF}
+
   function TSQLDA.GetByNameAsSingle(const Name: string): Single;
   begin
     Result := GetAsSingle(GetFieldIndex(AnsiString(Name)));
@@ -5415,6 +5551,14 @@ end;
   begin
     SetAsInteger(GetFieldIndex(AnsiString(Name)), Value);
   end;
+
+{$IFDEF DELPHI16_UP}
+  procedure TSQLDA.SetByNameAsNativeInt(const Name: string;
+    const Value: NativeInt);
+  begin
+    SetAsNativeInt(GetFieldIndex(AnsiString(Name)), Value);
+  end;
+{$ENDIF}
 
   procedure TSQLDA.SetByNameAsQuad(const Name: string;
     const Value: TISCQuad);
@@ -7029,6 +7173,18 @@ procedure TSQLParams.AddFieldType(const Name: string; FieldType: TUIBFieldType;
     SetFieldType(Index, sizeof(Integer), SQL_LONG + 1, 0);
     inherited;
   end;
+
+{$IFDEF DELPHI16_UP}
+  procedure TSQLParams.SetAsNativeInt(const Index: Word; const Value: NativeInt);
+  begin
+  {$IFDEF CPU64BITS}
+    SetFieldType(Index, sizeof(Int64), SQL_INT64 + 1, 0);
+  {$ELSE}
+    SetFieldType(Index, sizeof(Integer), SQL_LONG + 1, 0);
+  {$ENDIF}
+    inherited;
+  end;
+{$ENDIF}
 
   procedure TSQLParams.SetAsSingle(const Index: Word; const Value: Single);
   begin

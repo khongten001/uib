@@ -214,7 +214,8 @@ type
     procedure RemoveEventNotifier(Event: TUIBEvents);
     procedure AddEventNotifier(Event: TUIBEvents);
 
-    function GetInfoIntValue(const item: Integer): integer;
+    function GetInfoIntValue(const item: Integer): Integer;
+    function GetInfoInt64Value(const item: Integer): Int64;
 {$IFDEF FB20_UP}
     function GetInfoDateTimeValue(const item: Integer): TDateTime;
 {$ENDIF}
@@ -316,10 +317,10 @@ type
     { Page buffers from header page }
     property InfoSetPageBuffers: Integer index isc_info_set_page_buffers read GetInfoIntValue;
     { Amount of server memory (in bytes) currently in use. }
-    property InfoCurrentMemory: Integer index isc_info_current_memory read GetInfoIntValue;
+    property InfoCurrentMemory: Int64 index isc_info_current_memory read GetInfoInt64Value;
     { Maximum amount of memory (in bytes) used at one time since the first
       process attached to the database. }
-    property InfoMaxMemory: Integer index isc_info_max_memory read GetInfoIntValue;
+    property InfoMaxMemory: Int64 index isc_info_max_memory read GetInfoInt64Value;
     { Attachment ID. }
     property InfoAttachmentId: Integer index isc_info_attachment_id read GetInfoIntValue;
     { On-disk structure (ODS) major version number. }
@@ -416,7 +417,7 @@ type
     property InfoCreationDate: TDateTime index isc_info_creation_date read GetInfoDateTimeValue;
   {$ENDIF}
   {$IFDEF FB21_UP}
-    property InfoDBFileSize: Integer index isc_info_db_file_size read GetInfoIntValue;
+    property InfoDbFileSize: Int64 index isc_info_db_file_size read GetInfoInt64Value;
   {$ENDIF}
   {$IFDEF FB30_UP}
     property InfoPagesUsed: Integer index fb_info_pages_used read GetInfoIntValue;
@@ -1838,15 +1839,27 @@ begin
   end;
 end;
 
-function TUIBDataBase.GetInfoIntValue(const item: Integer): integer;
+function TUIBDataBase.GetInfoIntValue(const item: Integer): Integer;
 begin
   SetConnected(true);
   case item of
     isc_info_implementation,
     isc_info_base_level:
-    result := byte(FLibrary.DatabaseInfoString(FDbHandle, item, 8)[5]);
+    Result := byte(FLibrary.DatabaseInfoString(FDbHandle, item, 8)[5]);
   else
-    result := FLibrary.DatabaseInfoIntValue(FDbHandle, AnsiChar(item));
+    Result := FLibrary.DatabaseInfoIntValue(FDbHandle, AnsiChar(item));
+  end;
+end;
+
+function TUIBDataBase.GetInfoInt64Value(const item: Integer): Int64;
+begin
+  SetConnected(true);
+  case item of
+    isc_info_implementation,
+    isc_info_base_level:
+    Result := byte(FLibrary.DatabaseInfoString(FDbHandle, item, 8)[5]);
+  else
+    Result := FLibrary.DatabaseInfoInt64Value(FDbHandle, AnsiChar(item));
   end;
 end;
 

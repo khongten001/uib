@@ -977,6 +977,7 @@ type
     procedure DetachDatabase(var DBHandle: IscDbHandle);
     procedure DatabaseInfo(var DBHandle: IscDbHandle; const Items: AnsiString; var Buffer: AnsiString); overload;
     function DatabaseInfoIntValue(var DBHandle: IscDbHandle; const item: AnsiChar): Integer;
+    function DatabaseInfoInt64Value(var DBHandle: IscDbHandle; const item: AnsiChar): Int64;
     function DatabaseInfoString(var DBHandle: IscDbHandle; item: byte; size: Integer): AnsiString;
     function DatabaseInfoDateTime(var DBHandle: IscDbHandle; item: byte): TDateTime;
     procedure DatabaseDrop(DbHandle: IscDbHandle);
@@ -1908,29 +1909,69 @@ const
   function TUIBLibrary.DatabaseInfoIntValue(var DBHandle: IscDbHandle;
     const item: AnsiChar): Integer;
   var
-    data: packed record
-      item: AnsiChar;
-      len: word;
-      case byte of
-        0: (vByte: Byte);
-        1: (vSmallint: Smallint);
-        2: (vInteger: Integer);
-        3: (dummy: array[0..5] of byte);
-    end;
+    res_buffer: array[0..127] of Byte;
+    p: PByte;
+    len: SmallInt;
+    res_item: Byte;
   begin
-    result := 0;
+    Result := 0;
     CheckUIBApiCall(isc_database_info(@FStatusVector, @DBHandle, 1, @item,
-      sizeof(data), @data));
-    if (data.item = item) then
-      case data.len of
-        0: ;
-        1: result := data.vByte;
-        2: result := data.vSmallint;
-        4: result := data.vInteger;
-      else
-        raise exception.Create('Unexpected data size.');
-      end else
-        raise exception.Create('Invalid item identifier.');
+      sizeof(res_buffer), @res_buffer));
+
+    p := @res_buffer[0];
+    while p^ <> isc_info_end do
+    begin
+      res_item := p^;
+      Inc(p);
+
+      if res_item = isc_info_truncated then
+        raise Exception.Create('buffer is too small');
+
+      len := isc_vax_integer(PAnsiChar(p), 2);
+      Inc(p, 2);
+
+      if res_item = Byte(item) then
+      begin
+        Result := isc_vax_integer(PAnsiChar(p), len);
+        Exit;
+      end;
+
+      Inc(p, len)
+    end;
+  end;
+
+  function TUIBLibrary.DatabaseInfoInt64Value(var DBHandle: IscDbHandle;
+    const item: AnsiChar): Int64;
+  var
+    res_buffer: array[0..127] of Byte;
+    p: PByte;
+    len: SmallInt;
+    res_item: Byte;
+  begin
+    Result := 0;
+    CheckUIBApiCall(isc_database_info(@FStatusVector, @DBHandle, 1, @item,
+      sizeof(res_buffer), @res_buffer));
+
+    p := @res_buffer[0];
+    while p^ <> isc_info_end do
+    begin
+      res_item := p^;
+      Inc(p);
+
+      if res_item = isc_info_truncated then
+        raise Exception.Create('buffer is too small');
+
+      len := isc_vax_integer(PAnsiChar(p), 2);
+      Inc(p, 2);
+
+      if res_item = Byte(item) then
+      begin
+        Result := isc_portable_integer(PAnsiChar(p), len);
+        Exit;
+      end;
+
+      Inc(p, len)
+    end;
   end;
 
   function TUIBLibrary.DatabaseInfoDateTime(var DBHandle: IscDbHandle; item: byte): TDateTime;

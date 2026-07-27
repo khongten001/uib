@@ -68,6 +68,14 @@ type
 //******************************************************************************
   EUIBConvertError = class(Exception);
 
+  { One entry of the status vector: an error code followed by its arguments,
+    already converted to strings. }
+  TUIBStatusEntry = record
+    GDSCode: Integer;
+    Args: array of string;
+  end;
+  TUIBStatusEntries = array of TUIBStatusEntry;
+
   EUIBError = class(Exception)
   private
     FGDSCode: Integer;
@@ -76,7 +84,15 @@ type
 {$IFDEF FB25_UP}
     FSQLState: RawByteString;
 {$ENDIF}
+    FStatus: TUIBStatusEntries;
   public
+    { The first code of a status vector is often a wrapper - isc_no_meta_update
+      for any failed DDL statement, for instance - and the actual cause is one
+      of the codes that follow it, along with the name of the offending object.
+      GDSCode only exposes the first one, Status exposes them all. }
+    function HasGDSCode(Code: Integer): Boolean;
+    function FindGDSCode(Code: Integer; out Entry: TUIBStatusEntry): Boolean;
+    property Status: TUIBStatusEntries read FStatus;
     property ErrorCode: Integer read FErrorCode;
     property SQLCode: Integer read FSQLCode;
     property GDSCode: Integer read FGDSCode;
@@ -1548,6 +1564,88 @@ const
     Result := (code and CODE_MASK) shr 0;
   end;
 
+  { Split a status vector into its successive error codes, each one carrying
+    the arguments that follow it. }
+  function ParseStatusVector(const Vector: TStatusVector): TUIBStatusEntries;
+
+    procedure AddArg(const Value: string);
+    var
+      E: Integer;
+    begin
+      if Length(Result) = 0 then
+        Exit;
+      E := High(Result);
+      SetLength(Result[E].Args, Length(Result[E].Args) + 1);
+      Result[E].Args[High(Result[E].Args)] := Value;
+    end;
+
+    { Same conversion as the interpreted message: the arguments carry metadata
+      names, which are plain ASCII. }
+    function ArgToStr(P: Pointer): string;
+    begin
+      Result := string(AnsiString(PAnsiChar(P)));
+    end;
+
+  var
+    I: Integer;
+    S: RawByteString;
+  begin
+    Result := nil;
+    I := 0;
+    while (I < ISC_STATUS_LENGTH - 1) and (Vector[I] <> isc_arg_end) do
+      case Integer(Vector[I]) of
+        isc_arg_gds:
+          begin
+            SetLength(Result, Length(Result) + 1);
+            Result[High(Result)].GDSCode := Integer(Vector[I + 1]);
+            Inc(I, 2);
+          end;
+        isc_arg_string, isc_arg_interpreted{$IFDEF FB25_UP}, isc_arg_sql_state{$ENDIF}:
+          begin
+            AddArg(ArgToStr(Pointer(Vector[I + 1])));
+            Inc(I, 2);
+          end;
+        isc_arg_cstring:
+          begin
+            if I + 2 >= ISC_STATUS_LENGTH then
+              Break;
+            SetString(S, PAnsiChar(Pointer(Vector[I + 2])), Integer(Vector[I + 1]));
+            AddArg(string(AnsiString(S)));
+            Inc(I, 3);
+          end;
+        isc_arg_number:
+          begin
+            AddArg(IntToStr(Int64(Vector[I + 1])));
+            Inc(I, 2);
+          end;
+      else
+        Inc(I, 2);
+      end;
+  end;
+
+  function EUIBError.FindGDSCode(Code: Integer; out Entry: TUIBStatusEntry): Boolean;
+  var
+    I: Integer;
+  begin
+    for I := 0 to High(FStatus) do
+      if FStatus[I].GDSCode = Code then
+      begin
+        Entry := FStatus[I];
+        Result := True;
+        Exit;
+      end;
+    Entry.GDSCode := 0;
+    Entry.Args := nil;
+    Result := False;
+  end;
+
+  function EUIBError.HasGDSCode(Code: Integer): Boolean;
+  var
+    Entry: TUIBStatusEntry;
+  begin
+    Result := FindGDSCode(Code, Entry);
+  end;
+
   procedure TUIBLibrary.CheckUIBApiCall(const Status: ISCStatus);
   var
     Number: Integer;
@@ -1565,6 +1663,7 @@ const
         Exception.Message := Exception.Message + string(ErrSQLInterprete(Exception.FSQLCode));
       Exception.FGDSCode := Status;
       Exception.FErrorCode := GetCode(Status);
+      Exception.FStatus := ParseStatusVector(FStatusVector);
 {$IFDEF FB25_UP}
       Exception.FSQLState := ErrSqlState;
 {$ENDIF}
